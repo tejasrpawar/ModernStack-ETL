@@ -156,5 +156,5 @@ Custom functions for reusable business logic, including:
 - Discount calculations
 - Price transformations
 
-
+Airflow Window:
 ![Airflow DAG Window](dag.png)
