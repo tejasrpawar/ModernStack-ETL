@@ -157,4 +157,4 @@ Custom functions for reusable business logic, including:
 - Price transformations
 
 
-![Airflow DAG Window]: (/dag.png)
+![Airflow DAG Window]: (dag.png)
