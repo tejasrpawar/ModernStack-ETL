@@ -1,158 +1,49 @@
-# ModernStack ETL
-# ETL to ELT Pipeline using dbt, Snowflake, and Airflow
+Overview
+========
 
-This project demonstrates building a modern ETL pipeline using dbt, Snowflake, and Apache Airflow. It showcases dimensional modeling, data transformation, testing, and orchestration using popular data engineering tools.
+Welcome to Astronomer! This project was generated after you ran 'astro dev init' using the Astronomer CLI. This readme describes the contents of the project, as well as how to run Apache Airflow on your local machine.
 
-## Overview
+Project Contents
+================
 
-The pipeline transforms TPC-H sample data from Snowflake into analytics-ready fact and dimension tables using dbt for transformations and Airflow for orchestration.
+Your Astro project contains the following files and folders:
 
-## Prerequisites
+- dags: This folder contains the Python files for your Airflow DAGs. By default, this directory includes one example DAG:
+    - `example_astronauts`: This DAG shows a simple ETL pipeline example that queries the list of astronauts currently in space from the Open Notify API and prints a statement for each astronaut. The DAG uses the TaskFlow API to define tasks in Python, and dynamic task mapping to dynamically print a statement for each astronaut. For more on how this DAG works, see our [Getting started tutorial](https://www.astronomer.io/docs/learn/get-started-with-airflow).
+- Dockerfile: This file contains a versioned Astro Runtime Docker image that provides a differentiated Airflow experience. If you want to execute other commands or overrides at runtime, specify them here.
+- include: This folder contains any additional files that you want to include as part of your project. It is empty by default.
+- packages.txt: Install OS-level packages needed for your project by adding them to this file. It is empty by default.
+- requirements.txt: Install Python packages needed for your project by adding them to this file. It is empty by default.
+- plugins: Add custom or community plugins for your project to this file. It is empty by default.
+- airflow_settings.yaml: Use this local-only file to specify Airflow Connections, Variables, and Pools instead of entering them in the Airflow UI as you develop DAGs in this project.
 
-- Snowflake Account
-- Python 3.7+
-- pip
-- Apache Airflow
-- Astronomer CLI
-- dbt Core
+Deploy Your Project Locally
+===========================
 
-## Project Structure
+1. Start Airflow on your local machine by running 'astro dev start'.
 
-```
-├── dbt/
-│   ├── models/
-│   │   ├── staging/
-│   │   │   ├── staging_tpch_orders.sql
-│   │   │   └── staging_tpch_line_items.sql
-│   │   ├── marts/
-│   │   │   ├── int_order_items.sql
-│   │   │   ├── int_order_items_summary.sql
-│   │   │   └── fct_orders.sql
-│   │   └── tpch_sources.yml
-│   ├── macros/
-│   │   └── pricing.sql
-│   ├── tests/
-│   │   ├── generic/
-│   │   │   └── generic_tests.yml
-│   │   └── singular/
-│   │       ├── fact_orders_discount.sql
-│   │       └── fact_orders_date_valid.sql
-│   ├── dbt_project.yml
-│   └── packages.yml
-└── airflow/
-    └── dags/
-        └── dbt_dag.py
-```
+This command will spin up 4 Docker containers on your machine, each for a different Airflow component:
 
-## Setup Instructions
+- Postgres: Airflow's Metadata Database
+- Webserver: The Airflow component responsible for rendering the Airflow UI
+- Scheduler: The Airflow component responsible for monitoring and triggering tasks
+- Triggerer: The Airflow component responsible for triggering deferred tasks
 
-### 1. Snowflake Setup
+2. Verify that all 4 Docker containers were created by running 'docker ps'.
 
-```sql
--- Run as ACCOUNTADMIN
-CREATE WAREHOUSE dbt_warehouse WITH WAREHOUSE_SIZE = 'XSMALL';
-CREATE DATABASE dbt_db;
-CREATE ROLE dbt_role;
+Note: Running 'astro dev start' will start your project with the Airflow Webserver exposed at port 8080 and Postgres exposed at port 5432. If you already have either of those ports allocated, you can either [stop your existing Docker containers or change the port](https://www.astronomer.io/docs/astro/cli/troubleshoot-locally#ports-are-not-available-for-my-local-airflow-webserver).
 
--- Grant necessary privileges
-GRANT USAGE ON WAREHOUSE dbt_warehouse TO ROLE dbt_role;
-GRANT ALL ON DATABASE dbt_db TO ROLE dbt_role;
+3. Access the Airflow UI for your local Airflow project. To do so, go to http://localhost:8080/ and log in with 'admin' for both your Username and Password.
 
--- Create schema
-USE ROLE dbt_role;
-CREATE SCHEMA dbt_db.dbt_schema;
-```
+You should also be able to access your Postgres Database at 'localhost:5432/postgres'.
 
-### 2. dbt Setup
+Deploy Your Project to Astronomer
+=================================
 
-1. Install dbt Core:
-```bash
-pip install dbt-core
-```
+If you have an Astronomer account, pushing code to a Deployment on Astronomer is simple. For deploying instructions, refer to Astronomer documentation: https://www.astronomer.io/docs/astro/deploy-code/
 
-2. Initialize dbt project:
-```bash
-dbt init
-```
+Contact
+=======
 
-3. Install dependencies:
-```bash
-dbt deps
-```
-
-### 3. Airflow Setup
-
-1. Install Astronomer CLI:
-```bash
-brew install astro
-```
-
-2. Initialize Airflow project:
-```bash
-mkdir dbt_d
-cd dbt_d
-astro dev init
-```
-
-3. Add to requirements.txt:
-```
-astronomer-cosmos
-apache-airflow-providers-snowflake
-```
-
-4. Configure Snowflake connection in Airflow:
-- Connection ID: snowflake_con
-- Connection Type: Snowflake
-- Account: your_account
-- Warehouse: dbt_warehouse
-- Database: dbt_db
-- Role: dbt_role
-- Login: your_username
-- Password: your_password
-
-## Running the Pipeline
-
-### Local Development
-
-1. Run dbt models:
-```bash
-dbt run
-```
-
-2. Run dbt tests:
-```bash
-dbt test
-```
-
-### Airflow Orchestration
-
-1. Start Airflow:
-```bash
-astro dev start
-```
-
-2. Access Airflow UI at http://localhost:8080
-   - Username: admin
-   - Password: admin
-
-3. Trigger the DAG manually or wait for the scheduled run
-
-## Project Components
-
-### Data Models
-
-- **Staging Models**: Clean, renamed versions of source tables
-- **Intermediate Models**: Transformed and aggregated data
-- **Fact Tables**: Final analytical tables with business metrics
-
-### Tests
-
-- **Generic Tests**: Column constraints like uniqueness and referential integrity
-- **Singular Tests**: Custom SQL tests for business rules validation
-
-### Macros
-
-Custom functions for reusable business logic, including:
-- Discount calculations
-- Price transformations
+The Astronomer CLI is maintained with love by the Astronomer team. To report a bug or suggest a change, reach out to our support.
 
